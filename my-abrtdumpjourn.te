@@ -1,0 +1,18 @@
+
+module my-abrtdumpjourn 1.0;
+
+require {
+	type systemd_userdbd_runtime_t;
+	type abrt_dump_oops_t;
+	type systemd_userdbd_t;
+	type init_t;
+	class sock_file write;
+	class unix_stream_socket connectto;
+}
+
+#============= abrt_dump_oops_t ==============
+allow abrt_dump_oops_t init_t:unix_stream_socket connectto;
+
+#!!!! This avc is allowed in the current policy
+allow abrt_dump_oops_t systemd_userdbd_runtime_t:sock_file write;
+allow abrt_dump_oops_t systemd_userdbd_t:unix_stream_socket connectto;
