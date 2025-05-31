@@ -70,4 +70,10 @@
     <string name="accounts">Accounts</string>
     <string name="account_detail">Account Detail</string>
     <string name="switch_account">Switch Account</string>
+    
+    <!-- Widget -->
+    <string name="widget_name">Moe Memos Widget</string>
+    <string name="widget_description">Display recent memos and add new ones</string>
+    <string name="add_memo">Add Memo</string>
+    <string name="no_memos">No memos to display</string>
 </resources>

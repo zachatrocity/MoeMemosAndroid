@@ -1,12 +1,13 @@
 package me.mudkip.moememos.viewmodel
 
+import android.app.Application
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.suspendOnSuccess
@@ -23,15 +24,17 @@ import me.mudkip.moememos.data.service.AccountService
 import me.mudkip.moememos.data.service.MemoService
 import me.mudkip.moememos.ext.string
 import me.mudkip.moememos.ext.suspendOnErrorMessage
+import me.mudkip.moememos.widget.WidgetUtils
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import javax.inject.Inject
 
 @HiltViewModel
 class MemosViewModel @Inject constructor(
+    application: Application,
     private val memoService: MemoService,
     private val accountService: AccountService
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     var memos = mutableStateListOf<Memo>()
         private set
@@ -64,6 +67,9 @@ class MemosViewModel @Inject constructor(
             memos.addAll(data)
             errorMessage = null
             loadHost()
+            
+            // Refresh widget after loading memos
+            WidgetUtils.refreshWidgetsOnMemoChange(getApplication())
         }.suspendOnErrorMessage {
             errorMessage = it
         }
@@ -94,24 +100,28 @@ class MemosViewModel @Inject constructor(
     suspend fun updateMemoPinned(memoIdentifier: String, pinned: Boolean) = withContext(viewModelScope.coroutineContext) {
         memoService.repository.updateMemo(memoIdentifier, pinned = pinned).suspendOnSuccess {
             updateMemo(data)
+            WidgetUtils.refreshWidgetsOnMemoUpdate(getApplication(), data)
         }
     }
 
     suspend fun editMemo(memoIdentifier: String, content: String, resourceList: List<Resource>?, visibility: MemoVisibility): ApiResponse<Memo> = withContext(viewModelScope.coroutineContext) {
         memoService.repository.updateMemo(memoIdentifier, content, resourceList, visibility).suspendOnSuccess {
             updateMemo(data)
+            WidgetUtils.refreshWidgetsOnMemoUpdate(getApplication(), data)
         }
     }
 
     suspend fun archiveMemo(memoIdentifier: String) = withContext(viewModelScope.coroutineContext) {
         memoService.repository.archiveMemo(memoIdentifier).suspendOnSuccess {
             memos.removeIf { it.identifier == memoIdentifier }
+            WidgetUtils.refreshWidgetsOnMemoChange(getApplication())
         }
     }
 
     suspend fun deleteMemo(memoIdentifier: String) = withContext(viewModelScope.coroutineContext) {
         memoService.repository.deleteMemo(memoIdentifier).suspendOnSuccess {
             memos.removeIf { it.identifier == memoIdentifier }
+            WidgetUtils.refreshWidgetsOnMemoChange(getApplication())
         }
     }
 

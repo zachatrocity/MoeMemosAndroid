@@ -121,9 +121,16 @@ fun Navigation() {
                 navController.navigate(RouteName.SHARE)
             }
             Intent.ACTION_VIEW -> {
-                when (intent.getStringExtra("action")) {
-                    "compose" -> navController.navigate(RouteName.INPUT)
-                    "search" -> navController.navigate(RouteName.SEARCH)
+                val route = intent.getStringExtra("route")
+                if (route != null) {
+                    // Navigate to the specified route
+                    navController.navigate(route)
+                } else {
+                    // Handle action-based navigation
+                    when (intent.getStringExtra("action")) {
+                        "compose" -> navController.navigate(RouteName.INPUT)
+                        "search" -> navController.navigate(RouteName.SEARCH)
+                    }
                 }
             }
         }
